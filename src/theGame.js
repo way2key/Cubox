@@ -144,7 +144,7 @@ theGame.prototype = {
 
     this.add.tween(enemy).to({
       y:lastHeight
-    },1500+this.rnd.integerInRange(0, 250),Phaser.Easing.Default,true,0,-1,true);
+    },1500+this.rnd.integerInRange(0, 250),Phaser.Easing.Default,true,0,100,true);
 
     this.enemyGroup.add(enemy);
 
@@ -156,16 +156,20 @@ theGame.prototype = {
     this.physics.enable(smasher,Phaser.Physics.ARCADE);
     smasher.body.moves=false;
     var lastHeight=this.terrainGroup.getChildAt(0).y-40;
-    if(1==1){
+    if(1!=1){
       // fall
       this.add.tween(smasher).to({
         y:lastHeight
-      },600+this.rnd.integerInRange(0, 250),Phaser.Easing.Default,true,0,-1,true);
+      },600+this.rnd.integerInRange(0, 250),Phaser.Easing.Default,true,0,100,true);
     }else{
       // stay in place
+      console.log(this);
+      this.game.add.tween(smasher).to({y : smasher.y+10},1050,Phaser.Easing.Linear.None,true,0,100,true);
+      /*
       this.add.tween(smasher).to({
         y:smasher.y+10
       },1050,Phaser.Easing.Default,true,0,-1,true);
+      */
     }
 
 
