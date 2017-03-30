@@ -50,7 +50,6 @@ theGame.prototype = {
 	moveSquare: function(game){
     //nothing
 		if(this.hero.canMove){
-
 			// the hero is about to be moved so we aren't considering more inputs
 	    this.hero.canMove = false;
 
@@ -103,7 +102,7 @@ theGame.prototype = {
         // determining the level of the ground
         var sign=Math.random() < 0.5 ? -1 : 1;
         if(count<3){
-          if(level>9){
+          if(level>8){
             level-=1;
           }else if(level<6){
             level+=1;
@@ -119,15 +118,15 @@ theGame.prototype = {
         if(this.rnd.integerInRange(0,9)<6){
           this.addSmasher();
         }else{  this.addEnemy();}
-
       }, this);
+      this.score++;
 		}
 	},
 	update: function(game){
 		//looking for collision between the hero and the enemies
     game.physics.arcade.collide(this.hero,this.enemyGroup,function(game){
       //restart the game
-      //game.state.start("GameOver",true,false,score);
+      //this.state.start("GameOver",true,false,score);
       //alert("GAME OVER");
       //this.state.restart();
     });
@@ -163,7 +162,6 @@ theGame.prototype = {
       },600+this.rnd.integerInRange(0, 250),Phaser.Easing.Default,true,0,100,true);
     }else{
       // stay in place
-      console.log(this);
       this.game.add.tween(smasher).to({y : smasher.y+10},1050,Phaser.Easing.Linear.None,true,0,100,true);
       /*
       this.add.tween(smasher).to({
