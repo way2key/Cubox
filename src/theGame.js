@@ -123,12 +123,12 @@ theGame.prototype = {
 		}
 	},
 	update: function(game){
+    var that=this;
 		//looking for collision between the hero and the enemies
-    game.physics.arcade.collide(this.hero,this.enemyGroup,function(game){
+    game.physics.arcade.collide(this.hero,this.enemyGroup,function(){
       //restart the game
-      //this.state.start("GameOver",true,false,score);
-      //alert("GAME OVER");
-      //this.state.restart();
+      that.state.start("GameOver",true,false,score);
+      //that.state.restart();
     });
 
 	},
