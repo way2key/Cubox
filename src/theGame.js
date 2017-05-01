@@ -26,6 +26,7 @@ theGame.prototype = {
 			//create all groups
 		  this.terrainGroup = game.add.group();
 		  this.enemyGroup = game.add.group();
+      this.smasherGroup = game.add.group();
 		  game.stage.backgroundColor = 808080;
 
 			// filling the field with squares to create the terrain
@@ -70,6 +71,10 @@ theGame.prototype = {
 
 			//tween to scroll the ennemies to the left by squareSize pixels
 			var enemyTween = this.add.tween(this.enemyGroup).to({
+				x: this.terrainGroup.x -squareSize
+			},moveTime,Phaser.Easing.Linear.None,true);
+
+      var smasherTween = this.add.tween(this.smasherGroup).to({
 				x: this.terrainGroup.x -squareSize
 			},moveTime,Phaser.Easing.Linear.None,true);
 
@@ -127,7 +132,7 @@ theGame.prototype = {
 		//looking for collision between the hero and the enemies
     game.physics.arcade.collide(this.hero,this.enemyGroup,function(){
       //restart the game
-      that.state.start("GameOver",true,false,score);
+      //that.state.start("GameOver",true,false,score);
       //that.state.restart();
     });
 
@@ -140,10 +145,9 @@ theGame.prototype = {
     enemy.body.moves=false;
     var lastHeight=this.terrainGroup.getChildAt(0).y-40;
     //giving the enemy a yoyo tween to move it at a random speed
-
     this.add.tween(enemy).to({
       y:lastHeight
-    },1500+this.rnd.integerInRange(0, 250),Phaser.Easing.Default,true,0,100,true);
+    },1000+this.rnd.integerInRange(0, 750),Phaser.Easing.Default,true,0,-1,true);
 
     this.enemyGroup.add(enemy);
 
@@ -154,23 +158,35 @@ theGame.prototype = {
     var smasher = this.add.sprite(this.terrainGroup.getChildAt(0).x,0,"smasher");
     this.physics.enable(smasher,Phaser.Physics.ARCADE);
     smasher.body.moves=false;
-    var lastHeight=this.terrainGroup.getChildAt(0).y-40;
-    if(1!=1){
+    var that=this;
+    smasher.fall=function(){
       // fall
-      this.add.tween(smasher).to({
+      var fall=that.add.tween(theSmasher).to({
         y:lastHeight
-      },600+this.rnd.integerInRange(0, 250),Phaser.Easing.Default,true,0,100,true);
+      },600+that.rnd.integerInRange(0, 250),Phaser.Easing.Default,true,0);
+      fall.onComplete.add(swat,that);
+      function swat(){
+        that.game.camera.shake(0.002,200);
+      }
+      that.game.camera.onShakeComplete.add(disappear,that);
+      function disappear(){
+        var disappear=that.add.tween(theSmasher).to({alpha:0},150,Phaser.Easing.Linear.None,true,0);
+        disappear.onComplete.add(die,that);
+        function die(){
+          smasher.destroy();
+        }
+      }
+    }
+    this.smasherGroup.add(smasher);
+    this.terrainGroup.sort("x", Phaser.Group.SORT_ASCENDING);
+    theSmasher=this.smasherGroup.getChildAt(0);
+    var lastHeight=this.terrainGroup.getChildAt(0).y-40;
+    if(1==1){
+      theSmasher.fall();
     }else{
       // stay in place
-      this.game.add.tween(smasher).to({y : smasher.y+10},1050,Phaser.Easing.Linear.None,true,0,100,true);
-      /*
-      this.add.tween(smasher).to({
-        y:smasher.y+10
-      },1050,Phaser.Easing.Default,true,0,-1,true);
-      */
+      this.game.add.tween(smasher).to({y : smasher.y+10},1050,Phaser.Easing.Linear.None,true,0,-1,true);
     }
 
-
-    this.enemyGroup.add(smasher);
   }
 }
