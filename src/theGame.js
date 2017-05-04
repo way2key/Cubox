@@ -129,6 +129,11 @@ theGame.prototype = {
 	},
 	update: function(game){
     var that=this;
+    if(this.smasherGroup.length>=1){
+      this.smasherGroup.sort("x", Phaser.Group.SORT_ASCENDING);
+      theSmasher=this.smasherGroup.getChildAt(0);
+      theSmasher.fall(theSmasher.lastHeight);
+    }
 		//looking for collision between the hero and the enemies
     game.physics.arcade.collide(this.hero,this.enemyGroup,function(){
       //restart the game
@@ -157,36 +162,36 @@ theGame.prototype = {
     this.terrainGroup.sort("x", Phaser.Group.SORT_DESCENDING);
     var smasher = this.add.sprite(this.terrainGroup.getChildAt(0).x,0,"smasher");
     this.physics.enable(smasher,Phaser.Physics.ARCADE);
-    smasher.body.moves=false;
+    smasher.body.moves=true;
+    smasher.lastHeight=this.terrainGroup.getChildAt(0).y-40;
+    // stay in place
+    //this.game.add.tween(smasher).to({y : smasher.y+10},1050,Phaser.Easing.Linear.None,true,0,-1,true);
     var that=this;
-    smasher.fall=function(){
-      // fall
-      var fall=that.add.tween(theSmasher).to({
-        y:lastHeight
-      },600+that.rnd.integerInRange(0, 250),Phaser.Easing.Default,true,0);
-      fall.onComplete.add(swat,that);
-      function swat(){
-        that.game.camera.shake(0.002,200);
-      }
-      that.game.camera.onShakeComplete.add(disappear,that);
-      function disappear(){
-        var disappear=that.add.tween(theSmasher).to({alpha:0},150,Phaser.Easing.Linear.None,true,0);
-        disappear.onComplete.add(die,that);
-        function die(){
-          smasher.destroy();
+    smasher.fall=function(lastHeight){
+      //this.tween.remove(smasher);
+      if(smasher.body.moves){
+        smasher.body.moves=false;
+        // fall
+        var fall=that.add.tween(theSmasher).to({
+          y:lastHeight
+        },600+that.rnd.integerInRange(0, 250),Phaser.Easing.Default,true,0);
+        fall.onComplete.add(swat,that);
+        function swat(){
+          that.game.camera.shake(0.002,200);
+        }
+        that.game.camera.onShakeComplete.add(disappear,that);
+        function disappear(){
+          var disappear=that.add.tween(theSmasher).to({alpha:0},150,Phaser.Easing.Linear.None,true,0);
+          disappear.onComplete.add(die,that);
+          function die(){
+            smasher.destroy();
+          }
         }
       }
+
     }
     this.smasherGroup.add(smasher);
     this.terrainGroup.sort("x", Phaser.Group.SORT_ASCENDING);
-    theSmasher=this.smasherGroup.getChildAt(0);
-    var lastHeight=this.terrainGroup.getChildAt(0).y-40;
-    if(1==1){
-      theSmasher.fall();
-    }else{
-      // stay in place
-      this.game.add.tween(smasher).to({y : smasher.y+10},1050,Phaser.Easing.Linear.None,true,0,-1,true);
-    }
 
   }
 }
