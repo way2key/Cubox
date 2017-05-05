@@ -5,29 +5,32 @@ var theGame = function(game){
   this.startingSquareY = 7;
   this.level = 8;
   this.moveTime = 150;
-  this.count=Math.ceil(Math.random()*5)+2;
+  this.count = Math.ceil(Math.random()*5)+2;
   this.score = 0;
   // all variables available with their name
   var squareSize = this.squareSize;
   var startingSquareX = this.startingSquareX;
   var startingSquareY = this.startingSquareY;
-  var level = this.level;
   var moveTime = this.moveTime;
-  var count=this.count;
-  var score = this.score;
+  var count = this.count;
 }
 theGame();
 
 theGame.prototype = {
+  init: function(game){
+    this.score = 0;
+    this.count = Math.ceil(Math.random()*5)+2;
+    this.level = 8;
+  },
   create: function(game){
 
-			var gameTitle = this.game.add.text(game.world.centerX-140,game.world.height*5/24,"Almost working");
+      var gameTitle = this.game.add.text(this.game.world.centerX-140,this.game.world.height*5/24,"Almost working");
+      game.stage.backgroundColor = 808080;
 
 			//create all groups
 		  this.terrainGroup = game.add.group();
 		  this.enemyGroup = game.add.group();
       this.smasherGroup = game.add.group();
-		  game.stage.backgroundColor = 808080;
 
 			// filling the field with squares to create the terrain
 		  for(var i=0; i<game.width/squareSize+2; i++){
@@ -51,7 +54,7 @@ theGame.prototype = {
 	moveSquare: function(game){
     //nothing
 		if(this.hero.canMove){
-			// the hero is about to be moved so we aren't considering more inputs
+
 	    this.hero.canMove = false;
 
 			// if the hero have to go up
@@ -64,20 +67,18 @@ theGame.prototype = {
 	      this.hero.eyes.y-=squareSize;
 	    }
 
+      //tween to scroll all groups to the left by squareSize pixels
       this.terrainGroup.forEach(function(item){
-        //tween to scroll the terrain to the left by squareSize pixels
         var scrollTween = this.add.tween(item).to({
   	      x: item.x - squareSize
   	    }, moveTime, Phaser.Easing.Linear.None, true);
       }, this);
       this.enemyGroup.forEach(function(item){
-        //tween to scroll the ennemies to the left by squareSize pixels
         var scrollTween = this.add.tween(item).to({
   	      x: item.x - squareSize
   	    }, moveTime, Phaser.Easing.Linear.None, true);
       }, this);
       this.smasherGroup.forEach(function(item){
-        //tween to scroll the terrain to the left by squareSize pixels
         var scrollTween = this.add.tween(item).to({
   	      x: item.x - squareSize
   	    }, moveTime, Phaser.Easing.Linear.None, true);
@@ -88,7 +89,7 @@ theGame.prototype = {
 	      angle: this.hero.angle+90
 	    },moveTime, Phaser.Easing.Linear.None, true);
 
-      // once the tween has been completed...
+      // once the rotation has been completed...
       moveTween.onComplete.add(function(){
         if(this.terrainGroup.getChildAt(3).y>(this.hero.y+squareSize/2)){
           //go up
@@ -106,25 +107,25 @@ theGame.prototype = {
           this.enemyGroup.getChildAt(0).destroy();
         }
         //bring leftmost square to the right
-        this.terrainGroup.getChildAt(0).y=level*squareSize;
+        this.terrainGroup.getChildAt(0).y=this.level*squareSize;
         this.terrainGroup.getChildAt(0).x+=this.terrainGroup.length*squareSize;
 
         // determining the level of the ground
         var sign=Math.random() < 0.5 ? -1 : 1;
         if(count<3){
-          if(level>8){
-            level-=1;
-          }else if(level<6){
-            level+=1;
+          if(this.level>8){
+            this.level-=1;
+          }else if(this.level<6){
+            this.level+=1;
           }else{
-            level+=1*sign;
+            this.level+=1*sign;
           }
           count=Math.ceil(Math.random()*5)+2;
           }
         else{
             count--;
         }
-        //add an enemy
+        //create enemy with the enemy's creator handler
         if(this.rnd.integerInRange(0,9)<6){
           this.addSmasher();
         }else{  this.addEnemy();}
@@ -140,12 +141,12 @@ theGame.prototype = {
       },this);
     }
 		//looking for collision between the hero and the enemies
-    game.physics.arcade.collide(this.hero,this.enemyGroup,function(){
+    game.physics.arcade.collide(this.hero,this.enemyGroup,restart);
+    game.physics.arcade.collide(this.hero,this.smasherGroup,restart);
+    function restart(){
       //restart the game
-      //that.state.start("GameOver",true,false,score);
-      //that.state.restart();
-    });
-
+      that.state.start("GameOver",true,false,that.score);
+    }
 	},
 	addEnemy: function(game){
     // adding the enemy over the rightmost tile
@@ -180,11 +181,11 @@ theGame.prototype = {
         var fall=that.add.tween(smasher).to({y:lastHeight},400+that.rnd.integerInRange(100, 350),Phaser.Easing.Default,true,0);
         fall.onComplete.add(swat,that);
         function swat(){
-          that.game.camera.shake(0.003,200);
+          that.game.camera.shake(0.003,150);
         }
-        that.game.camera.onShakeComplete.add(disappear,that);
+        fall.onComplete.add(disappear,that);
         function disappear(){
-          var disappear=that.add.tween().to({alpha:0},150,Phaser.Easing.Linear.None,true,0);
+          var disappear=that.add.tween(smasher).to({alpha:0},150,Phaser.Easing.Linear.None,true,0);
           disappear.onComplete.add(die,that);
           function die(){
             smasher.destroy();
