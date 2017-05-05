@@ -64,19 +64,24 @@ theGame.prototype = {
 	      this.hero.eyes.y-=squareSize;
 	    }
 
-			//tween to scroll the terrain to the left by squareSize pixels
-			var scrollTween = this.add.tween(this.terrainGroup).to({
-	      x: this.terrainGroup.x - squareSize
-	    }, moveTime, Phaser.Easing.Linear.None, true);
-
-			//tween to scroll the ennemies to the left by squareSize pixels
-			var enemyTween = this.add.tween(this.enemyGroup).to({
-				x: this.terrainGroup.x -squareSize
-			},moveTime,Phaser.Easing.Linear.None,true);
-
-      var smasherTween = this.add.tween(this.smasherGroup).to({
-				x: this.terrainGroup.x -squareSize
-			},moveTime,Phaser.Easing.Linear.None,true);
+      this.terrainGroup.forEach(function(item){
+        //tween to scroll the terrain to the left by squareSize pixels
+        var scrollTween = this.add.tween(item).to({
+  	      x: item.x - squareSize
+  	    }, moveTime, Phaser.Easing.Linear.None, true);
+      }, this);
+      this.enemyGroup.forEach(function(item){
+        //tween to scroll the ennemies to the left by squareSize pixels
+        var scrollTween = this.add.tween(item).to({
+  	      x: item.x - squareSize
+  	    }, moveTime, Phaser.Easing.Linear.None, true);
+      }, this);
+      this.smasherGroup.forEach(function(item){
+        //tween to scroll the terrain to the left by squareSize pixels
+        var scrollTween = this.add.tween(item).to({
+  	      x: item.x - squareSize
+  	    }, moveTime, Phaser.Easing.Linear.None, true);
+      }, this);
 
 			// tween to rotate and move the hero
 	    var moveTween = this.add.tween(this.hero).to({
@@ -130,9 +135,9 @@ theGame.prototype = {
 	update: function(game){
     var that=this;
     if(this.smasherGroup.length>=1){
-      this.smasherGroup.sort("x", Phaser.Group.SORT_ASCENDING);
-      theSmasher=this.smasherGroup.getChildAt(0);
-      theSmasher.fall(theSmasher.lastHeight);
+      this.smasherGroup.forEach(function(item){
+        item.fall(item.lastHeight);
+      },this);
     }
 		//looking for collision between the hero and the enemies
     game.physics.arcade.collide(this.hero,this.enemyGroup,function(){
@@ -165,23 +170,21 @@ theGame.prototype = {
     smasher.body.moves=true;
     smasher.lastHeight=this.terrainGroup.getChildAt(0).y-40;
     // stay in place
-    //this.game.add.tween(smasher).to({y : smasher.y+10},1050,Phaser.Easing.Linear.None,true,0,-1,true);
+    var stay=this.game.add.tween(smasher).to({y : smasher.y+10},1050,Phaser.Easing.Linear.None,true,0,-1,true);
     var that=this;
     smasher.fall=function(lastHeight){
-      //this.tween.remove(smasher);
-      if(smasher.body.moves){
+      if(smasher.body.moves&&that.hero.x==smasher.x-20){
+        that.tweens.remove(stay);
         smasher.body.moves=false;
         // fall
-        var fall=that.add.tween(theSmasher).to({
-          y:lastHeight
-        },600+that.rnd.integerInRange(0, 250),Phaser.Easing.Default,true,0);
+        var fall=that.add.tween(smasher).to({y:lastHeight},400+that.rnd.integerInRange(100, 350),Phaser.Easing.Default,true,0);
         fall.onComplete.add(swat,that);
         function swat(){
-          that.game.camera.shake(0.002,200);
+          that.game.camera.shake(0.003,200);
         }
         that.game.camera.onShakeComplete.add(disappear,that);
         function disappear(){
-          var disappear=that.add.tween(theSmasher).to({alpha:0},150,Phaser.Easing.Linear.None,true,0);
+          var disappear=that.add.tween().to({alpha:0},150,Phaser.Easing.Linear.None,true,0);
           disappear.onComplete.add(die,that);
           function die(){
             smasher.destroy();
