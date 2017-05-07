@@ -12,6 +12,8 @@ preload.prototype = {
 				  this.game.load.image("eyes", "assets/images/hero_eyes.png");
 				  this.game.load.image("enemy", "assets/images/enemy.png");
 					this.game.load.image("smasher", "assets/images/smasher.png");
+					this.game.load.image("rain", "assets/images/rain.png")
+					this.game.load.image("speed", "assets/images/speed.png")
 					this.game.load.audio("crush", "assets/audio/crush.mp3");
 					this.game.load.audio("gameover", "assets/audio/gameover.wav");
 					this.game.load.audio("soundtrack", "assets/audio/soundtrack3.wav");
