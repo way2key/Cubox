@@ -7,11 +7,16 @@ preload.prototype = {
           this.load.setPreloadSprite(loadingBar);
 					this.game.load.image("play","assets/play.png");
 					// preloading the assets
-				  this.game.load.image("ground", "assets/ground.png");
-				  this.game.load.image("hero", "assets/hero.png");
-				  this.game.load.image("eyes", "assets/hero_eyes.png");
-				  this.game.load.image("enemy", "assets/enemy.png");
-					this.game.load.image("smasher", "assets/smasher.png");
+				  this.game.load.image("ground", "assets/images/ground.png");
+				  this.game.load.image("hero", "assets/images/hero.png");
+				  this.game.load.image("eyes", "assets/images/hero_eyes.png");
+				  this.game.load.image("enemy", "assets/images/enemy.png");
+					this.game.load.image("smasher", "assets/images/smasher.png");
+					this.game.load.audio("crush", "assets/audio/crush.mp3");
+					this.game.load.audio("gameover", "assets/audio/gameover.wav");
+					this.game.load.audio("soundtrack", "assets/audio/soundtrack2.mp3");
+					this.game.load.audio("speed", "assets/audio/speed.wav");
+					this.game.load.audio("slowdown", "assets/audio/slowdown.wav");
 
 	},
   	create: function(){

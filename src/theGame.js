@@ -4,14 +4,13 @@ var theGame = function(game){
   this.startingSquareX = 2;
   this.startingSquareY = 7;
   this.level = 8;
-  this.moveTime = 150;
+  this.moveTime = 125;
   this.count = Math.ceil(Math.random()*5)+2;
   this.score = 0;
   // all variables available with their name
   var squareSize = this.squareSize;
   var startingSquareX = this.startingSquareX;
   var startingSquareY = this.startingSquareY;
-  var moveTime = this.moveTime;
   var count = this.count;
 }
 theGame();
@@ -24,8 +23,11 @@ theGame.prototype = {
   },
   create: function(game){
 
-      var gameTitle = this.game.add.text(this.game.world.centerX-140,this.game.world.height*5/24,"Almost working");
       game.stage.backgroundColor = 808080;
+      
+      //start music
+      music = this.game.add.audio('soundtrack');
+      music.fadeIn(1500);
 
 			//create all groups
 		  this.terrainGroup = game.add.group();
@@ -33,7 +35,8 @@ theGame.prototype = {
       this.smasherGroup = game.add.group();
 
 			// filling the field with squares to create the terrain
-		  for(var i=0; i<game.width/squareSize+2; i++){
+      //game.width/squareSize+2
+		  for(var i=0; i<24; i++){
 		      var square = game.add.sprite(i*squareSize, 8*squareSize, "ground");
 		      this.terrainGroup.add(square);
 		  }
@@ -47,8 +50,18 @@ theGame.prototype = {
 		  game.physics.enable(this.hero, Phaser.Physics.ARCADE);
 		  this.hero.body.moves = false;
 
+      //Prevent directions and space key events bubbling up to browser
+      game.input.keyboard.addKeyCapture([
+        Phaser.Keyboard.LEFT,
+        Phaser.Keyboard.RIGHT,
+        Phaser.Keyboard.UP,
+        Phaser.Keyboard.DOWN,
+        Phaser.Keyboard.SPACEBAR
+    ]);
 			// input listener waiting for mouse or touch input, then calling moveSquare method
-		  game.input.onDown.add(this.moveSquare, this);
+		  //game.input.onDown.add(this.moveSquare, this);
+      //game.input.onHold.add(this.moveSquare, this);
+
 
 	},
 	moveSquare: function(game){
@@ -71,23 +84,23 @@ theGame.prototype = {
       this.terrainGroup.forEach(function(item){
         var scrollTween = this.add.tween(item).to({
   	      x: item.x - squareSize
-  	    }, moveTime, Phaser.Easing.Linear.None, true);
+  	    }, this.moveTime, Phaser.Easing.Linear.None, true);
       }, this);
       this.enemyGroup.forEach(function(item){
         var scrollTween = this.add.tween(item).to({
   	      x: item.x - squareSize
-  	    }, moveTime, Phaser.Easing.Linear.None, true);
+  	    }, this.moveTime, Phaser.Easing.Linear.None, true);
       }, this);
       this.smasherGroup.forEach(function(item){
         var scrollTween = this.add.tween(item).to({
   	      x: item.x - squareSize
-  	    }, moveTime, Phaser.Easing.Linear.None, true);
+  	    }, this.moveTime, Phaser.Easing.Linear.None, true);
       }, this);
 
 			// tween to rotate and move the hero
 	    var moveTween = this.add.tween(this.hero).to({
 	      angle: this.hero.angle+90
-	    },moveTime, Phaser.Easing.Linear.None, true);
+	    },this.moveTime, Phaser.Easing.Linear.None, true);
 
       // once the rotation has been completed...
       moveTween.onComplete.add(function(){
@@ -115,7 +128,7 @@ theGame.prototype = {
         if(count<3){
           if(this.level>8){
             this.level-=1;
-          }else if(this.level<6){
+          }else if(this.level<7){
             this.level+=1;
           }else{
             this.level+=1*sign;
@@ -135,6 +148,23 @@ theGame.prototype = {
 	},
 	update: function(game){
     var that=this;
+    if(game.input.activePointer.isDown){
+      that.moveSquare();
+    };
+    if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)){
+      var speed=this.game.add.audio('speed');
+      var slow=this.game.add.audio('slowdown');
+      that.hero.tint = 0xd21111;
+      speed.play("",0,0.2);
+      that.moveTime=75;
+      game.time.events.add(Phaser.Timer.SECOND*1.4, function(){
+        slow.play("",0,0.2);
+        game.time.events.add(Phaser.Timer.SECOND*0.6, function(){
+          that.moveTime=125;
+          that.hero.tint = 0xFFFFFF;
+        },that);
+      }, this);
+    }
     if(this.smasherGroup.length>=1){
       this.smasherGroup.forEach(function(item){
         item.fall(item.lastHeight);
@@ -145,7 +175,10 @@ theGame.prototype = {
     game.physics.arcade.collide(this.hero,this.smasherGroup,restart);
     function restart(){
       //restart the game
+      var gameover = that.game.add.audio('gameover');
+      gameover.play();
       that.state.start("GameOver",true,false,that.score);
+      music.destroy();
     }
 	},
 	addEnemy: function(game){
@@ -167,6 +200,7 @@ theGame.prototype = {
     // adding the enemy over the rightmost tile
     this.terrainGroup.sort("x", Phaser.Group.SORT_DESCENDING);
     var smasher = this.add.sprite(this.terrainGroup.getChildAt(0).x,0,"smasher");
+    var crush = this.game.add.audio('crush');
     this.physics.enable(smasher,Phaser.Physics.ARCADE);
     smasher.body.moves=true;
     smasher.lastHeight=this.terrainGroup.getChildAt(0).y-40;
@@ -181,11 +215,12 @@ theGame.prototype = {
         var fall=that.add.tween(smasher).to({y:lastHeight},400+that.rnd.integerInRange(100, 350),Phaser.Easing.Default,true,0);
         fall.onComplete.add(swat,that);
         function swat(){
-          that.game.camera.shake(0.003,150);
+          that.game.camera.shake(0.003,125);
         }
         fall.onComplete.add(disappear,that);
         function disappear(){
-          var disappear=that.add.tween(smasher).to({alpha:0},150,Phaser.Easing.Linear.None,true,0);
+          crush.play("",0,0.4);
+          var disappear=that.add.tween(smasher).to({alpha:0},125,Phaser.Easing.Linear.None,true,0);
           disappear.onComplete.add(die,that);
           function die(){
             smasher.destroy();
