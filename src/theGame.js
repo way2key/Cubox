@@ -7,6 +7,8 @@ var theGame = function(game){
   this.moveTime = 125;
   this.count = Math.ceil(Math.random()*5)+2;
   this.score = 0;
+  this.canBoost = true;
+  this.boost = 10;
   // all variables available with their name
   var squareSize = this.squareSize;
   var startingSquareX = this.startingSquareX;
@@ -21,9 +23,31 @@ theGame.prototype = {
     this.count = Math.ceil(Math.random()*5)+2;
     this.level = 8;
     this.moveTime = 125;
+    this.canBoost = true;
+    this.boost = 10;
   },
   create: function(game){
-
+      //text
+      this.textScore = game.add.text(20, 400, "Score: ", {
+        font: "65px Arial",
+        fill: "#013ADF",
+        align: "center"
+      });
+      this.textScore.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+      var grd = this.textScore.context.createLinearGradient(0, 0, 0, this.textScore.canvas.height);
+      grd.addColorStop(0, '#8ED6FF');
+      grd.addColorStop(1, '#004CB3');
+      this.textScore.fill = grd;
+      this.textBoost = game.add.text(game.world.centerX, 400, "Boost: "+this.boost, {
+        font: "65px Arial",
+        fill: "#013ADF",
+        align: "center"
+      });
+      this.textBoost.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+      var grd = this.textBoost.context.createLinearGradient(0, 0, 0, this.textBoost.canvas.height);
+      grd.addColorStop(0, '#8ED6FF');
+      grd.addColorStop(1, '#004CB3');
+      this.textBoost.fill = grd;
       game.stage.backgroundColor = 808080;
 
       //start music
@@ -59,10 +83,6 @@ theGame.prototype = {
         Phaser.Keyboard.DOWN,
         Phaser.Keyboard.SPACEBAR
     ]);
-			// input listener waiting for mouse or touch input, then calling moveSquare method
-		  //game.input.onDown.add(this.moveSquare, this);
-      //game.input.onHold.add(this.moveSquare, this);
-
 
 	},
 	moveSquare: function(game){
@@ -140,11 +160,29 @@ theGame.prototype = {
             count--;
         }
         //create enemy with the enemy's creator handler
-        if(this.rnd.integerInRange(0,9)<6){
-          this.addSmasher();
-        }else{  this.addEnemy();}
+        switch(this.rnd.integerInRange(0,6)){
+          case 1:
+            this.addSmasher();
+            break;
+          case 2:
+            this.addSmasher();
+            break;
+          case 3:
+            this.addSmasher();
+            break;
+          case 4:
+            this.addEnemy();
+            break;
+          case 5:
+            this.addEnemy();
+            break;
+          default:
+            break;
+        }
+
       }, this);
       this.score++;
+      this.textScore.setText("Score: "+this.score);
 		}
 	},
 	update: function(game){
@@ -153,18 +191,24 @@ theGame.prototype = {
       that.moveSquare();
     };
     if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)){
-      var speed=this.game.add.audio('speed');
-      var slow=this.game.add.audio('slowdown');
-      that.hero.tint = 0xd21111;
-      speed.play("",0,0.2);
-      that.moveTime=75;
-      game.time.events.add(Phaser.Timer.SECOND*1.4, function(){
-        slow.play("",0,0.2);
-        game.time.events.add(Phaser.Timer.SECOND*0.6, function(){
-          that.moveTime=125;
-          that.hero.tint = 0xFFFFFF;
-        },that);
-      }, this);
+      if(that.canBoost==true && !(that.boost<=0)){
+        that.canBoost=false;
+        that.boost--;
+        this.textBoost.setText("Boost: "+this.boost);
+        var speed=this.game.add.audio('speed');
+        var slow=this.game.add.audio('slowdown');
+        that.hero.tint = 0xd21111;
+        speed.play("",0,0.2);
+        that.moveTime=75;
+        game.time.events.add(Phaser.Timer.SECOND*1.4, function(){
+          slow.play("",0,0.2);
+          game.time.events.add(Phaser.Timer.SECOND*0.6, function(){
+            that.moveTime=125;
+            that.hero.tint = 0xFFFFFF;
+            that.canBoost=true;
+          },that);
+        }, this);
+      }
     }
     if(this.smasherGroup.length>=1){
       this.smasherGroup.forEach(function(item){
@@ -177,7 +221,7 @@ theGame.prototype = {
     function restart(){
       //restart the game
       var gameover = that.game.add.audio('gameover');
-      gameover.play();
+      gameover.play("",0,0.5);
       that.state.start("GameOver",true,false,that.score);
       music.destroy();
     }

@@ -13,7 +13,7 @@ gameOver.prototype = {
 	   	bar.beginFill(0x000000, 0.2);
 	   	bar.drawRect(0, 100, 1600, 100);
 	    //Score
-			var score = this.game.add.text(game.world.width*8/24,game.world.height*5/24,"You scored: "+this.score,titleStyle);
+			var score = this.game.add.text(game.world.width*8/24,game.world.height*5/24,"Score: "+this.score,titleStyle);
 			//var bestScore = this.game.add.text(game.world.centerX-140,game.world.height*7/24,"bestScore: "+this.bestScore,titleStyle);
 	    score.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
 	    var grd = score.context.createLinearGradient(0, 0, 0, score.canvas.height);
