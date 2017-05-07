@@ -50,7 +50,7 @@ theGame.prototype = {
       this.textBoost.fill = grd;
       game.stage.backgroundColor = 808080;
 
-      //start music
+      //music
       music = this.game.add.audio('soundtrack');
       music.fadeIn(1500);
 
@@ -58,6 +58,7 @@ theGame.prototype = {
 		  this.terrainGroup = game.add.group();
 		  this.enemyGroup = game.add.group();
       this.smasherGroup = game.add.group();
+      this.bonusGroup = game.add.group();
 
 			// filling the field with squares to create the terrain
       //game.width/squareSize+2
@@ -75,6 +76,19 @@ theGame.prototype = {
 		  game.physics.enable(this.hero, Phaser.Physics.ARCADE);
 		  this.hero.body.moves = false;
 
+      // creating the speed emitter particles
+      this.emitter = game.add.emitter(this.hero.x-20,this.hero.y,400);
+      this.emitter.height = this.squareSize;
+      this.emitter.width = 0;
+      this.emitter.makeParticles('rain');
+      this.emitter.minParticleScale = 0.1;
+      this.emitter.maxParticleScale = 0.4;
+      this.emitter.setYSpeed(-2, 2);
+      this.emitter.setXSpeed(-700, -100);
+      this.emitter.tint = 0xd21111;
+      this.emitter.start(false, 1600, 1, 0);
+      this.emitter.on = false;
+
       //Prevent directions and space key events bubbling up to browser
       game.input.keyboard.addKeyCapture([
         Phaser.Keyboard.LEFT,
@@ -90,15 +104,15 @@ theGame.prototype = {
 		if(this.hero.canMove){
 
 	    this.hero.canMove = false;
-
 			// if the hero have to go up
 	    this.terrainGroup.sort("x", Phaser.Group.SORT_ASCENDING);
 	    if(this.terrainGroup.getChildAt(3).y==(this.hero.y+squareSize/2)){
 	      //do nothing
 	    }else if(this.terrainGroup.getChildAt(3).y<(this.hero.y+squareSize/2)){
 	      //go up
-	      this.hero.y-=squareSize;
-	      this.hero.eyes.y-=squareSize;
+        var heroUp = this.add.tween(this.hero).to({y: this.hero.y-this.squareSize}, 1, Phaser.Easing.Linear.None, true);
+        var eyesUp = this.add.tween(this.hero.eyes).to({y: this.hero.y-this.squareSize}, 1, Phaser.Easing.Linear.None, true);
+        this.emitter.emitY = this.hero.y-this.squareSize;
 	    }
 
       //tween to scroll all groups to the left by squareSize pixels
@@ -117,6 +131,11 @@ theGame.prototype = {
   	      x: item.x - squareSize
   	    }, this.moveTime, Phaser.Easing.Linear.None, true);
       }, this);
+      this.bonusGroup.forEach(function(item){
+        var scrollTween = this.add.tween(item).to({
+  	      x: item.x - squareSize
+  	    }, this.moveTime, Phaser.Easing.Linear.None, true);
+      }, this);
 
 			// tween to rotate and move the hero
 	    var moveTween = this.add.tween(this.hero).to({
@@ -126,9 +145,10 @@ theGame.prototype = {
       // once the rotation has been completed...
       moveTween.onComplete.add(function(){
         if(this.terrainGroup.getChildAt(3).y>(this.hero.y+squareSize/2)){
-          //go up
-          this.hero.y+=squareSize;
-          this.hero.eyes.y+=squareSize;
+          //go down
+          var heroDown = this.add.tween(this.hero).to({y: this.hero.y+this.squareSize}, 1, Phaser.Easing.Linear.None, true);
+          var eyesDown = this.add.tween(this.hero.eyes).to({y: this.hero.y+this.squareSize}, 1, Phaser.Easing.Linear.None, true);
+          this.emitter.emitY = this.hero.y+this.squareSize;
         }
 
         //the hero can move again
@@ -176,6 +196,9 @@ theGame.prototype = {
           case 5:
             this.addEnemy();
             break;
+          case 6:
+            this.addSpeedBonus();
+            break;
           default:
             break;
         }
@@ -192,7 +215,8 @@ theGame.prototype = {
     };
     if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)){
       if(that.canBoost==true && !(that.boost<=0)){
-        that.canBoost=false;
+        that.emitter.on = true;
+        that.canBoost = false;
         that.boost--;
         this.textBoost.setText("Boost: "+this.boost);
         var speed=this.game.add.audio('speed');
@@ -203,9 +227,10 @@ theGame.prototype = {
         game.time.events.add(Phaser.Timer.SECOND*1.4, function(){
           slow.play("",0,0.2);
           game.time.events.add(Phaser.Timer.SECOND*0.6, function(){
-            that.moveTime=125;
+            that.moveTime = 125;
             that.hero.tint = 0xFFFFFF;
-            that.canBoost=true;
+            that.canBoost = true;
+            that.emitter.on = false;
           },that);
         }, this);
       }
@@ -215,6 +240,7 @@ theGame.prototype = {
         item.fall(item.lastHeight);
       },this);
     }
+
 		//looking for collision between the hero and the enemies
     game.physics.arcade.collide(this.hero,this.enemyGroup,restart);
     game.physics.arcade.collide(this.hero,this.smasherGroup,restart);
@@ -242,7 +268,7 @@ theGame.prototype = {
 
 	},
   addSmasher: function(game){
-    // adding the enemy over the rightmost tile
+    // adding the smasher over the rightmost tile
     this.terrainGroup.sort("x", Phaser.Group.SORT_DESCENDING);
     var smasher = this.add.sprite(this.terrainGroup.getChildAt(0).x,0,"smasher");
     var crush = this.game.add.audio('crush');
@@ -277,5 +303,21 @@ theGame.prototype = {
     this.smasherGroup.add(smasher);
     this.terrainGroup.sort("x", Phaser.Group.SORT_ASCENDING);
 
+  },
+  addSpeedBonus: function(game){
+    // adding the bonus over the rightmost tile
+    this.terrainGroup.sort("x", Phaser.Group.SORT_DESCENDING);
+    var bonus = this.add.sprite(this.terrainGroup.getChildAt(0).x-20,this.terrainGroup.getChildAt(0).y-30,"speed");
+    this.physics.enable(bonus,Phaser.Physics.ARCADE);
+    bonus.anchor.set(0.5);
+    bonus.alpha=0.8;
+    this.bonusGroup.add(bonus);
+    var stay=this.game.add.tween(bonus).to({y : bonus.y-3},1050,Phaser.Easing.Linear.None,true,0,-1,true);
+    var that=this;
+    bonus.get=function(){
+      that.game.physics.arcade.collide(bonus,that.hero,function(){
+        that.boost++;
+      });
+    }
   }
 }
