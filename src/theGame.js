@@ -20,11 +20,12 @@ theGame.prototype = {
     this.score = 0;
     this.count = Math.ceil(Math.random()*5)+2;
     this.level = 8;
+    this.moveTime = 125;
   },
   create: function(game){
 
       game.stage.backgroundColor = 808080;
-      
+
       //start music
       music = this.game.add.audio('soundtrack');
       music.fadeIn(1500);
