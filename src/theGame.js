@@ -7,7 +7,6 @@ var theGame = function(game){
   this.moveTime = 125;
   this.count = Math.ceil(Math.random()*5)+2;
   this.score = 0;
-  this.canBoost = true;
   this.boost = 10;
 
   // All variables available directly with their name
@@ -25,7 +24,6 @@ theGame.prototype = {
     this.count = Math.ceil(Math.random()*5)+2;
     this.level = 8;
     this.moveTime = 125;
-    this.canBoost = true;
     this.boost = 10;
   },
   create: function(game){
@@ -74,6 +72,8 @@ theGame.prototype = {
 		  this.hero.anchor.set(0.5);
 		  this.hero.eyes.anchor.set(0.5);
 		  this.hero.canMove = true;
+      this.hero.canBoost = true;
+      this.hero.canFlash = true;
 		  game.physics.enable(this.hero, Phaser.Physics.ARCADE);
 		  this.hero.body.moves = false;
 
@@ -224,7 +224,6 @@ theGame.prototype = {
     // Let's teleport!
     if(game.input.keyboard.isDown(Phaser.Keyboard.W)){
       that.teleportation();
-      that.speed();
     };
 
     // Are smashers falling?
@@ -318,9 +317,9 @@ theGame.prototype = {
     }
   },
   speed: function(game){
-    if(this.canBoost==true && !(this.boost<=0)){
+    if(this.hero.canBoost==true && !(this.boost<=0)){
       this.emitter.on = true;
-      this.canBoost = false;
+      this.hero.canBoost = false;
       this.boost--;
       this.textBoost.setText("Boost: "+this.boost);
       var speed=this.game.add.audio('speed');
@@ -333,15 +332,24 @@ theGame.prototype = {
         this.game.time.events.add(Phaser.Timer.SECOND*0.6, function(){
           this.moveTime = 125;
           this.hero.tint = 0xFFFFFF;
-          this.canBoost = true;
+          this.hero.canBoost = true;
           this.emitter.on = false;
         },this);
       }, this);
     }
   },
   teleportation: function(game){
-    //animation flash
-    //movesquare(3times)
-    //animation appear
+    if(this.hero.canFlash){
+      this.hero.canFlash = false;
+      //flash
+      this.step();
+      //spawn
+      this.game.time.events.add(Phaser.Timer.SECOND*10, function(){
+        that.hero.canFlash = true;
+      });
+    }
+  },
+  step: function(game){
+
   }
 }
