@@ -197,7 +197,9 @@ theGame.prototype = {
             this.addEnemy();
             break;
           case 6:
-            this.addSpeedBonus();
+            if(this.rnd.integerInRange(1,15)==10){
+              this.addSpeedBonus();
+            }
             break;
           default:
             break;
@@ -240,10 +242,15 @@ theGame.prototype = {
         item.fall(item.lastHeight);
       },this);
     }
+    if(this.bonusGroup.length>=1){
+      this.bonusGroup.forEach(function(item){
+        item.getBonus();
+      },this);
+    }
 
 		//looking for collision between the hero and the enemies
-    game.physics.arcade.collide(this.hero,this.enemyGroup,restart);
-    game.physics.arcade.collide(this.hero,this.smasherGroup,restart);
+    //game.physics.arcade.collide(this.hero,this.enemyGroup,restart);
+    //game.physics.arcade.collide(this.hero,this.smasherGroup,restart);
     function restart(){
       //restart the game
       var gameover = that.game.add.audio('gameover');
@@ -307,16 +314,18 @@ theGame.prototype = {
   addSpeedBonus: function(game){
     // adding the bonus over the rightmost tile
     this.terrainGroup.sort("x", Phaser.Group.SORT_DESCENDING);
-    var bonus = this.add.sprite(this.terrainGroup.getChildAt(0).x-20,this.terrainGroup.getChildAt(0).y-30,"speed");
+    var bonus = this.add.sprite(this.terrainGroup.getChildAt(0).x+20,this.terrainGroup.getChildAt(0).y-30,"speed");
     this.physics.enable(bonus,Phaser.Physics.ARCADE);
     bonus.anchor.set(0.5);
     bonus.alpha=0.8;
     this.bonusGroup.add(bonus);
     var stay=this.game.add.tween(bonus).to({y : bonus.y-3},1050,Phaser.Easing.Linear.None,true,0,-1,true);
     var that=this;
-    bonus.get=function(){
-      that.game.physics.arcade.collide(bonus,that.hero,function(){
-        that.boost++;
+    bonus.getBonus=function(){
+      that.game.physics.arcade.collide(that.hero,that.bonusGroup,function(){
+        that.boost+=1;
+        bonus.destroy();
+        that.textBoost.setText("Boost: "+that.boost);
       });
     }
   }
