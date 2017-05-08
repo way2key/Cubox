@@ -1,5 +1,5 @@
 var boot = function(game){
-	console.log("%cLet's do that!", "color:white; background:red");
+	console.log("Start this awesome game ;-)");
 };
 
 boot.prototype = {
