@@ -8,6 +8,7 @@ var theGame = function(game){
   this.count = Math.ceil(Math.random()*5)+2;
   this.score = 0;
   this.boost = 10;
+  this.bestScore = [];
 
   // All variables available directly with their name
   var squareSize = this.squareSize;
@@ -246,8 +247,11 @@ theGame.prototype = {
     function restart(){
       var gameover = that.game.add.audio('gameover');
       gameover.play("",0,0.5);
-      that.state.start("GameOver",true,false,that.score);
       music.destroy();
+  		that.bestScore.push(that.score);
+  		that.bestScore.sort(function(a, b){return b - a});
+      that.bestScore.slice(0,9);
+      that.state.start("GameOver",true,false,that.bestScore,that.score);
     }
 	},
 	addEnemy: function(game){
