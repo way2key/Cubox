@@ -92,6 +92,7 @@ theGame.prototype = {
       this.emitter.on = false;
 
       //Prevent directions and space key events bubbling up to browser
+      this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
       game.input.keyboard.addKeyCapture([
         Phaser.Keyboard.LEFT,
         Phaser.Keyboard.RIGHT,
@@ -218,7 +219,7 @@ theGame.prototype = {
     };
 
     // Let's speed!
-    if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)){
+    if(this.spaceKey.isDown){
       that.speed();
     }
 

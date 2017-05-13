@@ -5,20 +5,27 @@ gameTitle.prototype = {
   	create: function(game){
     // Background
     game.stage.backgroundColor = 808080;
+
     // Bar
-    var bar = game.add.graphics();
-    bar.beginFill(0x000000, 0.2);
-    bar.drawRect(0, 100, 800, 100);
+    this.bar = game.add.graphics();
+    this.bar.beginFill(0x000000, 0.2);
+    this.bar.drawRect(0, game.world.height*4/24, game.world.width, 100);
+
     // Title
-		var gameTitle = this.game.add.text(game.world.centerX-140,game.world.height*5/24,title,titleStyle);
+		var gameTitle = this.game.add.text(0,0,title,titleStyle);
     gameTitle.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+    gameTitle.alignIn(this.bar,Phaser.CENTER,0,75);
+
+    // Title gradient
     var grd = gameTitle.context.createLinearGradient(0, 0, 0, gameTitle.canvas.height);
     grd.addColorStop(0, '#8ED6FF');
     grd.addColorStop(1, '#004CB3');
     gameTitle.fill = grd;
+
     // Button
-		var playButton = this.game.add.button(160,320,"play",this.playTheGame,this);
-		playButton.anchor.setTo(0.5,0.5);
+		var playButton = this.game.add.button(game.world.centerX,game.world.height*12/24,"play",this.playTheGame,this);
+		playButton.anchor.setTo(0.5);
+
 	},
 	playTheGame: function(){
 		this.game.state.start("theGame");
