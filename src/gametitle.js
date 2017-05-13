@@ -14,7 +14,7 @@ gameTitle.prototype = {
     // Title
 		var gameTitle = this.game.add.text(0,0,title,titleStyle);
     gameTitle.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
-    gameTitle.alignIn(this.bar,Phaser.CENTER,0,75);
+    gameTitle.alignIn(this.bar,Phaser.CENTER,0,160);
 
     // Title gradient
     var grd = gameTitle.context.createLinearGradient(0, 0, 0, gameTitle.canvas.height);

@@ -29,7 +29,7 @@ theGame.prototype = {
   },
   create: function(game){
       // Print all texts
-      this.textScore = game.add.text(20, 400, "Score: ", {
+      this.textScore = game.add.text(20, 450, "Score: ", {
         font: "65px Arial",
         fill: "#013ADF",
         align: "center"
@@ -39,7 +39,7 @@ theGame.prototype = {
       grd.addColorStop(0, '#8ED6FF');
       grd.addColorStop(1, '#004CB3');
       this.textScore.fill = grd;
-      this.textBoost = game.add.text(game.world.centerX, 400, "Boost: "+this.boost, {
+      this.textBoost = game.add.text(game.world.centerX, 450, "Boost: "+this.boost, {
         font: "65px Arial",
         fill: "#013ADF",
         align: "center"

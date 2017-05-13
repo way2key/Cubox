@@ -17,7 +17,7 @@ gameOver.prototype = {
 
 	    // Score
 			var score = this.game.add.text(0,0,"Score: "+this.score,titleStyle);
-			score.alignIn(this.bar,Phaser.CENTER,0,75);
+			score.alignIn(this.bar,Phaser.CENTER,0,160);
 			var style = { font: "20px Courier", fill: "#fff", tabs: 132 };
 			score.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
 
@@ -29,11 +29,11 @@ gameOver.prototype = {
 			this.container = game.add.graphics();
 	    this.container.beginFill(0x77B5FE,0.9);
 			this.container.anchor.setTo(0.5);
-	    this.container.drawRect(game.world.centerX, game.world.height*16/24 , game.world.width*0.66, game.world.height/2);
-			var leaderBoard = game.add.text(0, 0, "Best Score\t", style);
-			var playersScores = game.add.text(0, 0, this.bestScoreText, style);
-			leaderBoard.alignIn(this.container,Phaser.TOP_RIGHT,0,0);
-			playersScores.alignIn(this.container,Phaser.TOP_RIGHT,0,0);
+	    this.container.drawRect(0, game.world.height*16/24 , game.world.width, game.world.height/2);
+			var leaderBoard = game.add.text(game.world.centerX-70, 300, "Best Score\t", style);
+			var playersScores = game.add.text(game.world.centerX-20, 320, this.bestScoreText, style);
+			leaderBoard.alignIn(this.bar,Phaser.BOTTOM_CENTER,0,200);
+			playersScores.alignIn(leaderBoard,Phaser.BOTTOM_CENTER,0,250);
 	    var grd = score.context.createLinearGradient(0, 0, 0, score.canvas.height);
 	    grd.addColorStop(0, '#8ED6FF');
 	    grd.addColorStop(1, '#004CB3');
