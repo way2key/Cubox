@@ -93,6 +93,7 @@ theGame.prototype = {
 
       //Prevent directions and space key events bubbling up to browser
       this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+      this.rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
       game.input.keyboard.addKeyCapture([
         Phaser.Keyboard.LEFT,
         Phaser.Keyboard.RIGHT,
@@ -214,7 +215,7 @@ theGame.prototype = {
     var that=this;
 
     // A step forward for the hero
-    if(game.input.activePointer.isDown){
+    if(game.input.activePointer.isDown||this.rightKey.isDown){
       that.moveSquare();
     };
 
@@ -251,7 +252,7 @@ theGame.prototype = {
       music.destroy();
   		that.bestScore.push(that.score);
   		that.bestScore.sort(function(a, b){return b - a});
-      that.bestScore.slice(0,9);
+      that.bestScore.splice(6);
       that.state.start("GameOver",true,false,that.bestScore,that.score);
     }
 	},
